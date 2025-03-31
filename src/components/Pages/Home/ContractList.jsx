@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Pencil } from "lucide-react";
 import { Trash } from "lucide-react";
+import { deleteContract, getContractList } from "../../../Services/api";
 const ContractList = ({ setSelectedContract ,fillterContracts}) => {
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,19 +10,14 @@ const ContractList = ({ setSelectedContract ,fillterContracts}) => {
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
-
+  const [deleting, setdeleting] = useState([]);
   useEffect(() => {
     const fetchContracts = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/contracts`, {
-          params: {
-            page,
-            limit
-          }
-        });
+        const response = await getContractList(page, limit); 
         setContracts(response.data);
         setLoading(false);
-        const totalItems = response.headers['x-total-count'];
+        const totalItems = parseInt(response.headers?.['x-total-count'] || 0);
         setTotalPages(Math.ceil(totalItems / limit));
       } catch (err) {
         console.error('Error fetching contracts:', err);
@@ -31,13 +27,14 @@ const ContractList = ({ setSelectedContract ,fillterContracts}) => {
     };
 
     fetchContracts();
-  }, [page, limit]);
-useEffect(() => {
-  setContracts(fillterContracts);
-}, [fillterContracts]);
+  }, [page, limit,deleting]);
+  useEffect(() => {
+    setContracts(fillterContracts);
+  }, [fillterContracts]);
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/contracts/${id}`);
+    const response= await deleteContract(id);
+    setdeleting(response.data);
     } catch (error) {
       console.error('Error deleting contract:', error);
     }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Pop from "../../Common/Pop";
+import { addContractDetails, ContractUpdate } from "../../../Services/api";
 const ContractForm = ({ selectedContract, setSelectedContract, fetchContracts }) => {
   const [clientName, setClientName] = useState(selectedContract?.client_name || "");
   const [contractId, setContractId] = useState(selectedContract?.contract_id || "");
@@ -27,18 +28,19 @@ const ContractForm = ({ selectedContract, setSelectedContract, fetchContracts })
       if (selectedContract) {
         setIsOpen(true);
         setMessage("Contract updated successfully");
-        await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/contracts/${selectedContract.id}`, payload).then(() => {
+        ContractUpdate(selectedContract,payload).then(() => {
           setMessage("Contract updated successfully");
           
         });
       } else {
         setIsOpen(true);
-        await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/contracts`, payload).then(() => {
-          setMessage("Contract saved successfully");
-        });
+        await addContractDetails(payload);
+        setMessage("Contract saved successfully");
+        fetchContracts();
       }
       fetchContracts();
     } catch (error) {
+      setMessage("Error saving contract");
       console.error("Error saving contract:", error);
     }
   };

@@ -1,14 +1,16 @@
 import { useState } from "react";
 import axios from "axios";
+import { searchContracts } from "../../../Services/api";
 const SearchFilter = ({ setContracts }) => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSearch = async () => {
+  const handleSearch = async (e) => {
+    e.preventDefault();
     try {
       setIsLoading(true);
-      const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/contracts?client_name=${search}&status=${status}`);
+      const {data}  = await searchContracts(search, status);
       setContracts(data);
     } catch (error) {
       console.error("Error searching contracts:", error);
